@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:meal_app/screens/tabs.dart';
 
@@ -12,7 +13,11 @@ final theme = ThemeData(
 );
 
 void main() {
-  runApp(const App());
+  // Wrapping with ProviderScope is required to get provider data
+  // we can wrap anywhere where data is required
+  runApp(const ProviderScope(
+    child: App(),
+  ));
 }
 
 class App extends StatelessWidget {

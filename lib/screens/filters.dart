@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meal_app/provider/filter_provider.dart';
 import 'package:meal_app/widget/filter_item.dart';
 
-enum Filter { glutenFree, lactoseFree, vegan, vegetarian }
-
-class FiltersScreen extends StatefulWidget {
-  const FiltersScreen({super.key, required this.currentFilters});
-
-  final Map<Filter, bool> currentFilters;
+class FiltersScreen extends ConsumerStatefulWidget {
+  const FiltersScreen({super.key});
 
   @override
-  State<FiltersScreen> createState() => _FiltersScreenState();
+  ConsumerState<FiltersScreen> createState() => _FiltersScreenState();
 }
 
-class _FiltersScreenState extends State<FiltersScreen> {
+class _FiltersScreenState extends ConsumerState<FiltersScreen> {
   bool _glutenFreeFilterSet = false;
   bool _lactoseFreeFilterSet = false;
   bool _veganFilterSet = false;
@@ -21,10 +19,13 @@ class _FiltersScreenState extends State<FiltersScreen> {
   @override
   void initState() {
     super.initState();
-    _glutenFreeFilterSet = widget.currentFilters[Filter.glutenFree]!;
-    _lactoseFreeFilterSet = widget.currentFilters[Filter.lactoseFree]!;
-    _veganFilterSet = widget.currentFilters[Filter.vegan]!;
-    _vegeterianFilterSet = widget.currentFilters[Filter.vegetarian]!;
+    // using read() bcoz initState() will run once
+    final activeFilters = ref.read(filterProvider);
+
+    _glutenFreeFilterSet = activeFilters[Filter.glutenFree]!;
+    _lactoseFreeFilterSet = activeFilters[Filter.lactoseFree]!;
+    _veganFilterSet = activeFilters[Filter.vegan]!;
+    _vegeterianFilterSet = activeFilters[Filter.vegetarian]!;
   }
 
   void _filterToggle(bool isChecked, String title) {
@@ -60,16 +61,13 @@ class _FiltersScreenState extends State<FiltersScreen> {
         // onWillPop function will be invoked by flutter
         // when user leaves the screen
         onWillPop: () async {
-          Navigator.of(context).pop({
+          ref.read(filterProvider.notifier).setFilters({
             Filter.glutenFree: _glutenFreeFilterSet,
             Filter.lactoseFree: _lactoseFreeFilterSet,
             Filter.vegan: _veganFilterSet,
             Filter.vegetarian: _vegeterianFilterSet
           });
-          // if return true, it will pop the screen out of stack
-          // returning false bcoz above we already using pop
-          // So, as a result we only pop out screen once
-          return false;
+          return true;
         },
         child: Column(
           children: [

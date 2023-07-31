@@ -1,29 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:meal_app/data/dummy_data.dart';
-import 'package:meal_app/models/meal.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meal_app/provider/favorites_provider.dart';
+import 'package:meal_app/provider/filter_provider.dart';
 import 'package:meal_app/screens/categories.dart';
 import 'package:meal_app/screens/filters.dart';
 import 'package:meal_app/screens/meals.dart';
 import 'package:meal_app/widget/main_drawer.dart';
 
-const kInitialFilters = {
-  Filter.glutenFree: false,
-  Filter.lactoseFree: false,
-  Filter.vegan: false,
-  Filter.vegetarian: false
-};
-
-class TabScreen extends StatefulWidget {
+// ConsumerStatefulWidget: to consume data from provider
+class TabScreen extends ConsumerStatefulWidget {
   const TabScreen({super.key});
 
+// change state with consumerState
   @override
-  State<TabScreen> createState() => _TabScreenState();
+  ConsumerState<TabScreen> createState() => _TabScreenState();
 }
 
-class _TabScreenState extends State<TabScreen> {
+class _TabScreenState extends ConsumerState<TabScreen> {
   int _selectedPageIndex = 0;
-  final List<Meal> _favrouiteMeal = [];
-  Map<Filter, bool> _selectedFilter = kInitialFilters;
 
   void _onSelectPage(index) {
     setState(() {
@@ -31,72 +25,37 @@ class _TabScreenState extends State<TabScreen> {
     });
   }
 
-  void _showInfoMessage(String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void _onToggleFavrouiteMeal(Meal meal) {
-    final isExist = _favrouiteMeal.contains(meal);
-
-    if (isExist) {
-      setState(() {
-        _favrouiteMeal.remove(meal);
-      });
-      _showInfoMessage("Meal removed from the favrouites...");
-    } else {
-      setState(() {
-        _favrouiteMeal.add(meal);
-      });
-      _showInfoMessage('Meal added in the favrouites...');
-    }
-  }
-
-  void _setScreen(String identifier) async {
+  void _setScreen(String identifier) {
     Navigator.of(context).pop();
 
     if (identifier == "filters") {
       // below code is used for replacing screen instead of pushing on the stack
       // Navigator.of(context).pushReplacement()
-      final result = await Navigator.of(context).push(
-        MaterialPageRoute(
-            builder: (ctx) => FiltersScreen(
-                  currentFilters: _selectedFilter,
-                )),
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (ctx) => const FiltersScreen()),
       );
-
-      setState(() {
-        _selectedFilter = result;
-      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final availableMeals = dummyMeals.where((meal) {
-      if (_selectedFilter[Filter.glutenFree]! && !meal.isGlutenFree) {
-        return false;
-      }
-      if (_selectedFilter[Filter.lactoseFree]! && !meal.isLactoseFree) {
-        return false;
-      }
-      if (_selectedFilter[Filter.vegan]! && !meal.isVegan) {
-        return false;
-      }
-      if (_selectedFilter[Filter.vegetarian]! && !meal.isVegetarian) {
-        return false;
-      }
-      return true;
-    }).toList();
+    // Inside consumer we have access to ref which have utility function
+    // like watch(), read() etc
+    // watch() is used to call build method when their is any changes in data
+    // final meals = ref.watch(mealProvider);
+    // final activeFilters = ref.watch(filterProvider);
 
-    Widget activePage = CategoriesScreen(
-        onToggleFav: _onToggleFavrouiteMeal, availableMeals: availableMeals);
+    final availableMeals = ref.watch(filteredMealProvider);
+
+    Widget activePage = CategoriesScreen(availableMeals: availableMeals);
     String activeTitle = "Pick your Category";
 
     if (_selectedPageIndex == 1) {
+      final favroitesMeal = ref.watch(favoritesMealProvider);
+
       activePage = MealsScreen(
-          meals: _favrouiteMeal, onToggleFav: _onToggleFavrouiteMeal);
+        meals: favroitesMeal,
+      );
       activeTitle = "Your Favrouites";
     }
 

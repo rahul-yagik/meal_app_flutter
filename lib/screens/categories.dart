@@ -6,10 +6,8 @@ import 'package:meal_app/screens/meals.dart';
 import 'package:meal_app/widget/category_item.dart';
 
 class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen(
-      {super.key, required this.onToggleFav, required this.availableMeals});
+  const CategoriesScreen({super.key, required this.availableMeals});
 
-  final void Function(Meal meal) onToggleFav;
   final List<Meal> availableMeals;
 
   // Navigation to different screen
@@ -23,7 +21,6 @@ class CategoriesScreen extends StatelessWidget {
       builder: (ctx) => MealsScreen(
         title: category.title,
         meals: filteredMeal,
-        onToggleFav: onToggleFav,
       ),
     ));
   }
