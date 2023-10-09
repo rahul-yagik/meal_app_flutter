@@ -34,14 +34,17 @@ class MealItem extends StatelessWidget {
         child: Stack(
           children: [
             // FadeInImage() used for smooth fadeIn transition
-            FadeInImage(
-              // MemoryImage is used for loading images from memory
-              placeholder: MemoryImage(kTransparentImage),
-              // NetworkImage() used for loading external images
-              image: NetworkImage(meal.imageUrl),
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
+            Hero(
+              tag: meal.id,
+              child: FadeInImage(
+                // MemoryImage is used for loading images from memory
+                placeholder: MemoryImage(kTransparentImage),
+                // NetworkImage() used for loading external images
+                image: NetworkImage(meal.imageUrl),
+                height: 200,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
             Positioned(
                 left: 0,

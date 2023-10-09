@@ -19,23 +19,35 @@ class MealDetailScreen extends ConsumerWidget {
         title: Text(meal.title),
         actions: [
           IconButton(
-              onPressed: () {
-                // read will only read once. it is useful for events
-                // favoritesMealProvider.notifier is used for accessing its returning class
-                final wasAdded = ref
-                    .read(favoritesMealProvider.notifier)
-                    .toggleMealFavoritesStatus(meal);
+            onPressed: () {
+              // read will only read once. it is useful for events
+              // favoritesMealProvider.notifier is used for accessing its returning class
+              final wasAdded = ref
+                  .read(favoritesMealProvider.notifier)
+                  .toggleMealFavoritesStatus(meal);
 
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(
-                    wasAdded
-                        ? "Meal added as a favorites"
-                        : " Meal removed from favorites",
-                  ),
-                ));
-              },
-              icon: Icon(isFavorite ? Icons.star : Icons.star_border))
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(
+                  wasAdded
+                      ? "Meal added as a favorites"
+                      : " Meal removed from favorites",
+                ),
+              ));
+            },
+            // AnimationSwitcher is used to play animation when widget changes
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) => RotationTransition(
+                turns: Tween(begin: 0.9, end: 1.0).animate(animation),
+                child: child,
+              ),
+              child: Icon(
+                isFavorite ? Icons.star : Icons.star_border,
+                key: ValueKey(isFavorite),
+              ),
+            ),
+          )
         ],
       ),
       body: Padding(
@@ -44,11 +56,14 @@ class MealDetailScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.network(
-                meal.imageUrl,
-                height: 300,
-                width: double.infinity,
-                fit: BoxFit.cover,
+              Hero(
+                tag: meal.id,
+                child: Image.network(
+                  meal.imageUrl,
+                  height: 300,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(
                 height: 20,
